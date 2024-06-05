@@ -169,8 +169,8 @@ int main(void)
 
     glUseProgram(program);
 
-    //int location = glGetUniformLocation(program, "u_Color");
-    //glUniform4f(location, 0.5f, 0.3f, 0.1f, 1.0f);
+    int location = glGetUniformLocation(program, "u_Color");
+    glUniform4f(location, 0.5f, 0.3f, 0.1f, 1.0f);
 
     glUseProgram(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

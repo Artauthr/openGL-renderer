@@ -22,19 +22,29 @@ void VertexArray::Unbind() const
 
 void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& layout)
 {
-	Bind();
-	vb.Bind();
-	const auto& elements = layout.GetElements();
-	unsigned int offset = 0;
+    Bind();
+    vb.Bind();
+    const auto& elements = layout.GetElements();
+    unsigned int offset = 0;
+    for (unsigned int i = 0; i < elements.size(); i++)
+    {
+        const auto& element = elements[i];
 
-	for (unsigned int i = 0; i < elements.size(); i++)
-	{
-		const auto& element = elements[i];
+        // Debugging information
+        std::cout << "Attribute " << i << ": count = " << element.count
+            << ", type = " << element.type
+            << ", normalized = " << (int)element.normalized
+            << ", stride = " << layout.GetStride()
+            << ", offset = " << offset << std::endl;
 
-		glEnableVertexAttribArray(i);
-		glVertexAttribPointer(i, element.count, element.type,
-			element.normalized, layout.GetStride(), (const void*) offset);
-		offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
-	}
-	
+
+        glEnableVertexAttribArray(i);
+        glVertexAttribPointer(i,
+            element.count,
+            element.type,
+            element.normalized,
+            layout.GetStride(),
+            (const void*)(uintptr_t)offset);
+        offset += element.count * VertexBufferElement::GetSizeOfType(element.type);
+    }
 }

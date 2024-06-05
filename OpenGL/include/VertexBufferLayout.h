@@ -1,6 +1,7 @@
 #pragma once
 #include "vector"
 #include "GL/glew.h"
+#include <iostream>
 
 struct VertexBufferElement
 {
@@ -9,11 +10,12 @@ struct VertexBufferElement
 	unsigned char normalized;
 
 	VertexBufferElement(unsigned int c, unsigned int t, unsigned char n) :
-		 type(t), count(c), normalized(n)
+		type(t), count(c), normalized(n)
 	{
-
+		std::cout << "VertexBufferElement created: count = " << count
+			<< ", type = " << type
+			<< ", normalized = " << (int)normalized << std::endl;
 	}
-
 
 	static unsigned int GetSizeOfType(unsigned int type)
 	{
@@ -37,7 +39,7 @@ private:
 
 	void Push(unsigned int type, unsigned int count, unsigned char normalized)
 	{
-		m_Elements.push_back({ type, count, normalized });
+		m_Elements.push_back({ count, type, normalized });
 		m_Stride += count * VertexBufferElement::GetSizeOfType(type);
 	};
 
@@ -49,6 +51,6 @@ public:
 	void AddUnsignedInt(unsigned int count) { Push(GL_UNSIGNED_INT, count, GL_FALSE); }
 	void AddUnsignedByte(unsigned int count) { Push(GL_UNSIGNED_BYTE, count, GL_TRUE); }
 
-	inline const std::vector<VertexBufferElement> GetElements() const { return m_Elements; };
+	inline const std::vector<VertexBufferElement> GetElements() const& { return m_Elements; };
 	inline unsigned int GetStride() const { return m_Stride; };
 };
