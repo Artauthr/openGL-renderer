@@ -7,6 +7,10 @@
 #include <string>
 #include <sstream>
 
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
+#include "VertexArray.h"
+
 static std::string ParseFile(const std::string& filepath)
 {
     std::ifstream file(filepath);
@@ -80,10 +84,11 @@ void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
     GLsizei length, const GLchar* message, const void* userParam) {
     std::cerr << "OpenGL Debug Message:" << std::endl;
     std::cerr << "Source: " << source << std::endl;
-    std::cerr << "Type: " << type << std::endl;
-    std::cerr << "ID: " << id << std::endl;
+    //std::cerr << "Type: " << type << std::endl;
+    //std::cerr << "ID: " << id << std::endl;
     std::cerr << "Severity: " << severity << std::endl;
     std::cerr << "Message: " << message << std::endl;
+    std::cerr << "==========================" << std::endl;
 }
 
 
@@ -93,6 +98,10 @@ int main(void)
 
     if (!glfwInit())
         return -1;
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
@@ -137,25 +146,17 @@ int main(void)
         2, 3, 0,
     };
 
-    //set up vertex buffer
-    unsigned int buffer;
 
-    glGenBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 2, positions, GL_STATIC_DRAW);
+    VertexArray va;
+    VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+    IndexBuffer ib(indices, 6);
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+    VertexBufferLayout layout;
+    layout.AddFloat(2);
 
-
+    va.AddBuffer(vb, layout);
 
     //set up indices
-    unsigned int ibo;
-
-    glGenBuffers(1, &ibo);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 6, indices, GL_STATIC_DRAW);
-
 
 
 
@@ -168,16 +169,24 @@ int main(void)
 
     glUseProgram(program);
 
-    int location = glGetUniformLocation(program, "u_Color");
-    //_ASSERT(location != -1);
-    glUniform4f(location, 0.5f, 0.3f, 0.1f, 1.0f);
+    //int location = glGetUniformLocation(program, "u_Color");
+    //glUniform4f(location, 0.5f, 0.3f, 0.1f, 1.0f);
 
-
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 
     while (!glfwWindowShouldClose(window))
     {
       
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);   
+
+        glUseProgram(program);
+
+
+        va.Bind();
+        ib.Bind();
 
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
@@ -187,8 +196,9 @@ int main(void)
         glfwPollEvents();
     }
 
-    glDeleteProgram(program);
-    glDeleteBuffers(1, &buffer);
+  
+
+  
     glfwTerminate();
 
     return 0;
