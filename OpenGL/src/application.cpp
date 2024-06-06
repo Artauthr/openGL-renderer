@@ -1,84 +1,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-
 #include <iostream>
-#include <fstream>
 #include <string>
-#include <sstream>
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "VertexArray.h"
+#include "Shader.h"
 
-static std::string ParseFile(const std::string& filepath)
-{
-    std::ifstream file(filepath);
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-
-    return buffer.str();
-}
-
-static unsigned int CompileShader(const GLuint type, const std::string& source)
-{
-    unsigned int id = glCreateShader(type);
-    const char* src = source.c_str();
-
-    glShaderSource(id, 1, &src, nullptr);
-
-    glCompileShader(id);
-
-
-    // check status
-    GLint status;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &status);
-
-    if (status != GL_TRUE)
-    {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetShaderInfoLog(id, 1024, &log_length, message);
-
-        std::cout << "Failed to compile shader of type: " << type << std::endl;
-        std::cout << message << std::endl;
-
-        glDeleteShader(id);
-        return 0;
-    }
-
-    return id;
-}
-
-static unsigned int CreateShaderProgram(const std::string& vertexShader, const std::string& fragmentShader)
-{
-    unsigned int program = glCreateProgram();
-    unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
-    unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
- 
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-
-    glLinkProgram(program);
-
-    GLint program_linked;
-    glGetProgramiv(program, GL_LINK_STATUS, &program_linked);
-    if (program_linked != GL_TRUE)
-    {
-        GLsizei log_length = 0;
-        GLchar message[1024];
-        glGetProgramInfoLog(program, 1024, &log_length, message);
-        std::cout << "Failed linking program: " << message << std::endl;
-    }
-
-
-    glValidateProgram(program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    return program;
-}
 
 void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam) {
@@ -156,35 +86,22 @@ int main(void)
 
     va.AddBuffer(vb, layout);
 
-    //set up indices
+    Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
+    shader.Bind();
+    shader.SetUniform4f("u_Color", 0.9f, 0.3f, 0.1f, 1.0f);
 
 
-
-    // set up shaders
-    std::string vertexSrc = ParseFile("res/shaders/vertex.shader");
-    std::string fragSrc = ParseFile("res/shaders/fragment.shader");
-
-    unsigned int program = CreateShaderProgram(vertexSrc, fragSrc);
-
-
-    glUseProgram(program);
-
-    int location = glGetUniformLocation(program, "u_Color");
-    glUniform4f(location, 0.5f, 0.3f, 0.1f, 1.0f);
-
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    shader.Unbind();
+    vb.Unbind();
+    va.Unbind();
+    ib.Unbind();
 
     while (!glfwWindowShouldClose(window))
     {
       
         glClear(GL_COLOR_BUFFER_BIT);   
 
-        glUseProgram(program);
-
-
+        shader.Bind();
         va.Bind();
         ib.Bind();
 

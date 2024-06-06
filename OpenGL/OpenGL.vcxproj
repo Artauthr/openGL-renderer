@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\application.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\VertexArray.h" />
     <ClInclude Include="include\VertexBufferLayout.h" />
+    <ClInclude Include="include\Shader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
