@@ -5,11 +5,13 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <unordered_map>
 
 class Shader
 {
 private:
 	unsigned int m_RendererID;
+	std::unordered_map<std::string, int> m_LocationMap;
 public:
 	Shader(const std::string &vsFilePath, const std::string &fsFilePath);
 	~Shader();
@@ -17,6 +19,8 @@ public:
 	void Bind() const;
 	void Unbind() const;
 
+	void SetUniform1i(const std::string& name, int v0);
+	void SetUniform1f(const std::string& name, float v0);
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
 
 private:
