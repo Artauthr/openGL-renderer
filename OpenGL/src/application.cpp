@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #include <iostream>
 #include <string>
@@ -12,6 +14,7 @@
 #include "Texture.h"
 
 
+
 void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam) {
     std::cerr << "OpenGL Debug Message:" << std::endl;
@@ -21,6 +24,10 @@ void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum 
     std::cerr << "Severity: " << severity << std::endl;
     std::cerr << "Message: " << message << std::endl;
     std::cerr << "==========================" << std::endl;
+
+   // if (severity == GL_DEBUG_SEVERITY_HIGH || severity == GL_DEBUG_SEVERITY_MEDIUM) {
+   //     __debugbreak();
+   // }
 }
 
 
@@ -91,23 +98,26 @@ int main(void)
 
     va.AddBuffer(vb, layout);
 
+    glm::mat4 proj = glm::ortho(-5.0f, 5.0f, -4.0f, 4.0f, -1.0f, 1.0f);
+
+    
     Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.9f, 0.3f, 0.1f, 1.0f);
-
-
-    shader.Unbind();
-    vb.Unbind();
-    va.Unbind();
-    ib.Unbind();
-
-    Renderer renderer;
-
+    shader.SetUniformMat4("u_MVP", proj);
 
     Texture texture("res/textures/icon.png");
     texture.Bind();
     shader.SetUniform1i("u_Texture", 0);
 
+    vb.Unbind();
+    va.Unbind();
+    ib.Unbind();
+    shader.Unbind();
+
+    Renderer renderer;
+
+ 
 
 
     while (!glfwWindowShouldClose(window))
