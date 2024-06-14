@@ -13,10 +13,19 @@
 #include "Renderer.h"
 #include "Texture.h"
 
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_opengl3.h"
+#include "imgui/imgui_impl_glfw.h"
+
 
 
 void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
     GLsizei length, const GLchar* message, const void* userParam) {
+    if (severity < GL_DEBUG_SEVERITY_HIGH)
+    {
+        return;
+    }
+
     std::cerr << "OpenGL Debug Message:" << std::endl;
     std::cerr << "Source: " << source << std::endl;
     std::cerr << "Severity: " << severity << std::endl;
@@ -50,11 +59,10 @@ int main(void)
     /* context */
     glfwMakeContextCurrent(window);
 
+  
+
     // glew innit?
     GLenum err = glewInit();
-
-
-
     if (GLEW_OK != err)
     {
         std::cout << (stderr, "Error: %s\n", glewGetErrorString(err)) << std::endl;
@@ -82,6 +90,22 @@ int main(void)
         2, 3, 0,
     };
 
+
+    // setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+ 
+
+    ImGui::StyleColorsDark();
+
+    // setup imGui Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(nullptr);
+    /////// 
+
+
     // blending
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -98,14 +122,12 @@ int main(void)
 
     glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
     glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
 
-    glm::mat4 mvp = proj * view * model;
     
     Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
     shader.Bind();
     shader.SetUniform4f("u_Color", 0.9f, 0.3f, 0.1f, 1.0f);
-    shader.SetUniformMat4("u_MVP", mvp);
+  
 
     Texture texture("res/textures/icon.png");
     texture.Bind();
@@ -118,14 +140,34 @@ int main(void)
 
     Renderer renderer;
 
- 
+    glm::vec3 translation(200, 200, 0);
 
 
     while (!glfwWindowShouldClose(window))
     {
       
         renderer.Clear();     
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+        glm::mat4 mvp = proj * view * model;
+
+        shader.SetUniformMat4("u_MVP", mvp);
+
         renderer.Draw(va, ib, shader);
+
+        {
+            ImGui::SliderFloat3("float", &translation.x, 0.0f, 960.0f);        
+            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+        }
+
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 
         glfwSwapBuffers(window);
 
@@ -133,8 +175,10 @@ int main(void)
         glfwPollEvents();
     }
 
-  
 
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
   
     glfwTerminate();
 

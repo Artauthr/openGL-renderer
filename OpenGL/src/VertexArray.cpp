@@ -30,14 +30,6 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, const VertexBufferLayout& la
     {
         const auto& element = elements[i];
 
-        // Debugging information
-        std::cout << "Attribute " << i << ": count = " << element.count
-            << ", type = " << element.type
-            << ", normalized = " << (int)element.normalized
-            << ", stride = " << layout.GetStride()
-            << ", offset = " << offset << std::endl;
-
-
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i,
             element.count,

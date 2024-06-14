@@ -12,9 +12,6 @@ struct VertexBufferElement
 	VertexBufferElement(unsigned int c, unsigned int t, unsigned char n) :
 		type(t), count(c), normalized(n)
 	{
-		std::cout << "VertexBufferElement created: count = " << count
-			<< ", type = " << type
-			<< ", normalized = " << (int)normalized << std::endl;
 	}
 
 	static unsigned int GetSizeOfType(unsigned int type)
