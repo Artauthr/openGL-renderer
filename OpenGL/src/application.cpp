@@ -17,6 +17,9 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_impl_glfw.h"
 
+#include "tests/TestClearColor.h"
+#include "tests/Test.h"
+
 
 
 void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity,
@@ -69,34 +72,28 @@ int main(void)
         return 0;
     }
 
+    std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;\
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
     glDebugMessageCallback(openglDebugCallback, nullptr);
 
 
-    std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;
+    // blending
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    //triangle arr
-    float positions[] = {
-        100.0f, 100.0f, 0.0f, 0.0f, //0
-        200.0f, 100.0f, 1.0f, 0.0f, //1
-        200.0f, 200.0f, 1.0f, 1.0f, //2
-        100.0f, 200.0f, 0.0f, 1.0f, //3
-    };
+    
+    Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
+    shader.Bind();
 
-    unsigned int indices[] = {
-        0, 1, 2,
-        2, 3, 0,
-    };
+    Renderer renderer;
 
-
-    // setup Dear ImGui context
+    // setup ImGui 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
- 
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; 
+
 
     ImGui::StyleColorsDark();
 
@@ -105,65 +102,37 @@ int main(void)
     ImGui_ImplOpenGL3_Init(nullptr);
     /////// 
 
+    test::Test* currentTest;
+    test::TestMenu* menu = new test::TestMenu(currentTest);
+    currentTest = menu;
 
-    // blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    menu->RegisterTest<test::TestClearColor>("Clear Color");
 
-    VertexArray va;
-    VertexBuffer vb(positions, 4 * 4 * sizeof(float));
-    IndexBuffer ib(indices, 6);
-
-    VertexBufferLayout layout;
-    layout.AddFloat(2);
-    layout.AddFloat(2);
-
-    va.AddBuffer(vb, layout);
-
-    glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
-    glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(-100, 0, 0));
-
-    
-    Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-    shader.Bind();
-    shader.SetUniform4f("u_Color", 0.9f, 0.3f, 0.1f, 1.0f);
-  
-
-    Texture texture("res/textures/icon.png");
-    texture.Bind();
-    shader.SetUniform1i("u_Texture", 0);
-
-    vb.Unbind();
-    va.Unbind();
-    ib.Unbind();
-    shader.Unbind();
-
-    Renderer renderer;
-
-    glm::vec3 translation(200, 200, 0);
 
 
     while (!glfwWindowShouldClose(window))
     {
-      
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         renderer.Clear();     
 
+      
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
-        glm::mat4 mvp = proj * view * model;
-
-        shader.SetUniformMat4("u_MVP", mvp);
-
-        renderer.Draw(va, ib, shader);
-
+        if (currentTest)
         {
-            ImGui::SliderFloat3("float", &translation.x, 0.0f, 960.0f);        
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+            currentTest->OnUpdate(0.0f);
+            currentTest->OnRender();
+            ImGui::Begin("Test");
+            if (currentTest != menu && ImGui::Button("<-"))
+            {
+                delete currentTest;
+                currentTest = menu;
+            }
+            currentTest->OnImGuiRender();
+            ImGui::End();
         }
-
 
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
