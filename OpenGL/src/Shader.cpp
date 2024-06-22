@@ -43,6 +43,7 @@ unsigned int Shader::CompileShader(const GLuint type, const std::string& source)
         std::cout << message << std::endl;
 
         glDeleteShader(id);
+        __debugbreak();
         return 0;
     }
 
@@ -68,6 +69,7 @@ unsigned int Shader::CreateShaderProgram(const std::string& vertexShader, const 
         GLchar message[1024];
         glGetProgramInfoLog(program, 1024, &log_length, message);
         std::cout << "Failed linking program: " << message << std::endl;
+        __debugbreak();
     }
 
 
