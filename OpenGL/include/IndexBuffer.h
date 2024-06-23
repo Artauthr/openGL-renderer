@@ -1,18 +1,16 @@
 #pragma once
+
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 class IndexBuffer
 {
-private:
-	unsigned int m_RendererID;
-	unsigned int m_Count;
 public:
-	IndexBuffer(const unsigned int* data, unsigned int count);
+	IndexBuffer();
 	~IndexBuffer();
-
-	void Bind() const;
-	void Unbind() const;
-
-	inline unsigned int GetCount() const { return m_Count; }
+	void Bind();
+	void Unbind();
+	void SetBufferData(GLint size, const void* data, GLenum usage);
+private:
+	GLuint ID;
 };
-

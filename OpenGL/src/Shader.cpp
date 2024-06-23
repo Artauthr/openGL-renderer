@@ -69,7 +69,6 @@ unsigned int Shader::CreateShaderProgram(const std::string& vertexShader, const 
         GLchar message[1024];
         glGetProgramInfoLog(program, 1024, &log_length, message);
         std::cout << "Failed linking program: " << message << std::endl;
-        __debugbreak();
     }
 
 

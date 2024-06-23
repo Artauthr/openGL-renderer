@@ -1,15 +1,17 @@
 #pragma once
+
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 
 class VertexBuffer
 {
-private:
-	unsigned int m_RendererID;
 public:
-	VertexBuffer(const void* data, unsigned int size);
+	VertexBuffer();
 	~VertexBuffer();
-
-	void Bind() const;
-	void Unbind() const;
+	void Bind();
+	void Unbind();
+	void SetBufferData(GLint size, const void* data, GLenum usage);
+	void AttribPointer(GLuint location, GLsizei attribSize, int stride, const void* offsetPtr);
+private:
+	unsigned int ID;
 };
-

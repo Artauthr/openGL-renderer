@@ -1,5 +1,6 @@
 #pragma once
-#include "GL/glew.h"
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "glm/glm.hpp"
 
 #include <string>
@@ -14,7 +15,7 @@ private:
 	unsigned int m_RendererID;
 	std::unordered_map<std::string, int> m_LocationMap;
 public:
-	Shader(const std::string &vsFilePath, const std::string &fsFilePath);
+	Shader(const std::string& vsFilePath, const std::string& fsFilePath);
 	~Shader();
 
 	void Bind() const;
