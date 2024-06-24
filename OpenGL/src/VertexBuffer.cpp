@@ -27,8 +27,8 @@ void VertexBuffer::SetBufferData(GLint size, const void* data, GLenum usage)
 	glBufferData(GL_ARRAY_BUFFER, size, data, usage);
 }
 
-void VertexBuffer::AttribPointer(GLuint location, GLsizei attribSize, int stride, const void* offsetPtr)
+void VertexBuffer::AttribPointer(GLuint location, GLsizei attribSize, int stride, unsigned int offsetPtr)
 {
-	glVertexAttribPointer(location, attribSize, GL_FLOAT, GL_FALSE, stride, offsetPtr);
+	glVertexAttribPointer(location, attribSize, GL_FLOAT, GL_FALSE, stride, (void*)(offsetPtr * sizeof(float)));
 	glEnableVertexAttribArray(location);
 }

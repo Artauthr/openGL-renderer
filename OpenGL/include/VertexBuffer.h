@@ -11,7 +11,7 @@ public:
 	void Bind();
 	void Unbind();
 	void SetBufferData(GLint size, const void* data, GLenum usage);
-	void AttribPointer(GLuint location, GLsizei attribSize, int stride, const void* offsetPtr);
+	void AttribPointer(GLuint location, GLsizei attribSize, int stride, unsigned int offsetPtr);
 private:
 	unsigned int ID;
 };

@@ -478,6 +478,10 @@
     <None Include="src\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="res\shaders\lighting\frag_light_src.shader" />
+    <None Include="res\shaders\lighting\frag_lighted_obj.shader" />
+    <None Include="res\shaders\lighting\vert_lighted_obj.shader" />
+    <None Include="res\shaders\lighting\vertex_light_src.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vendor\stb_image.h">

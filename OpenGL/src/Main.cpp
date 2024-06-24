@@ -35,6 +35,10 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+// lighting
+glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColor(1.0f, 1.0f, 1.0f);
+
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
@@ -43,7 +47,7 @@ static void APIENTRY openglDebugCallback(GLenum source, GLenum type, GLuint id, 
     GLsizei length, const GLchar* message, const void* userParam) {
     if (severity < GL_DEBUG_SEVERITY_HIGH)
     {
-        return;
+       // return;
     }
 
     std::cerr << "OpenGL Debug Message:" << std::endl;
@@ -83,7 +87,7 @@ int main(void)
     glfwSetScrollCallback(window, scroll_callback);
 
     // tell GLFW to capture our mouse
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 
     //////// setup ImGui 
@@ -119,18 +123,18 @@ int main(void)
     std::cout << "GL Version: " << glGetString(GL_VERSION) << std::endl;
 
     float vertices[] = {
-        // Position           // Color            // Texture Coords
+        // Position          
         // Front face
-        -0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,   0.0f, 0.0f, // 0
-         0.5f, -0.5f, -0.5f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // 1
-         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f, // 2
-        -0.5f,  0.5f, -0.5f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f, // 3
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
 
         // Back face
-        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // 4
-         0.5f, -0.5f,  0.5f,   0.0f, 1.0f, 0.0f,   0.0f, 1.0f, // 5
-         0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // 6
-        -0.5f,  0.5f,  0.5f,   1.0f, 1.0f, 0.0f,   1.0f, 0.0f  // 7
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f,
     };
 
     unsigned int indices[] = {
@@ -142,27 +146,43 @@ int main(void)
          0, 1, 5, 5, 4, 0   // Bottom face
     };
 
+    Shader lightSource("res/shaders/lighting/vertex_light_src.shader", "res/shaders/lighting/frag_light_src.shader");
+    Shader lightedObject("res/shaders/lighting/vert_lighted_obj.shader", "res/shaders/lighting/frag_lighted_obj.shader");
 
-    Shader shader("res/shaders/vertex.shader", "res/shaders/fragment.shader");
-    VertexArrayObject vao;
-    vao.Bind();
+    VertexArrayObject cubeVAO;
+    cubeVAO.Bind();
 
-    VertexBuffer vb;
-    vb.Bind();
-    vb.SetBufferData(sizeof(vertices), vertices, GL_STATIC_DRAW);
+    VertexBuffer cubeVB;
+    cubeVB.Bind();
+    cubeVB.SetBufferData(sizeof(vertices), &vertices, GL_STATIC_DRAW);
+    cubeVB.AttribPointer(0, 3, sizeof(float) * 3, 0);
 
-    vb.AttribPointer(0, 3, 8 * sizeof(float), (void*)0);
-    vb.AttribPointer(1, 3, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-    vb.AttribPointer(2, 2, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    IndexBuffer cubeIB;
+    cubeIB.Bind();
+    cubeIB.SetBufferData(sizeof(indices), &indices, GL_STATIC_DRAW);
 
-    IndexBuffer ib;
-    ib.Bind();
-    ib.SetBufferData(sizeof(indices), indices, GL_STATIC_DRAW);
+    cubeVAO.Unbind();
 
-    Texture texture("res/textures/container.jpg");
 
-    shader.Bind();
-    shader.SetUniform1i("tex1", 0);
+    //// lighter
+    VertexArrayObject lightSourceVAO;
+    lightSourceVAO.Bind();
+
+    VertexBuffer lightSourceVB;
+    lightSourceVB.Bind();
+    lightSourceVB.SetBufferData(sizeof(vertices), &vertices, GL_STATIC_DRAW);
+    lightSourceVB.AttribPointer(0, 3, sizeof(float) * 3, 0);
+
+    IndexBuffer lightSourceIB;
+    lightSourceIB.Bind();
+    lightSourceIB.SetBufferData(sizeof(indices), &indices, GL_STATIC_DRAW);
+
+    ////
+
+    lightedObject.Bind();
+    lightedObject.SetUniformVec3("objectColor", glm::vec3(1.0f, 0.0f, 0.0f));
+    //lightedObject.SetUniformVec3("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
+    lightedObject.Unbind();
    
 
     while (!glfwWindowShouldClose(window))
@@ -174,29 +194,39 @@ int main(void)
         processInput(window);
 
 
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        texture.Bind();
-        shader.Bind();
-   
+        lightedObject.Bind();
+        lightedObject.SetUniformVec3("lightColor", lightColor);
 
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), 1280.0f / 720.0f, 0.1f, 100.0f);
-        shader.SetUniformMat4("projection", projection);
-
-        // camera/view transformation
+        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        shader.SetUniformMat4("view", view);
+        lightedObject.SetUniformMat4("projection", projection);
+        lightedObject.SetUniformMat4("view", view);
 
-
-        vao.Bind();
-
+        // world transformation
         glm::mat4 model = glm::mat4(1.0f);
+        lightedObject.SetUniformMat4("model", model);
 
-        model = glm::rotate(model, glm::radians(45.0f), glm::vec3(1.0f, 0.3f, 0.5f));
-        shader.SetUniformMat4("model", model);
-
+    
+        cubeVAO.Bind();
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+    
+        lightSource.Bind();
+        lightSource.SetUniformMat4("projection", projection);
+        lightSource.SetUniformMat4("view", view);
+      
+        // world transformation
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, lightPos);
+        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
+        lightSource.SetUniformMat4("model", model);
+      
+        lightSourceVAO.Bind();
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -204,6 +234,7 @@ int main(void)
         
         ImGui::Begin("Info");
         ImGui::Text("deltaTime: %.3f ms", deltaTime * 1000.0f);
+        ImGui::SliderFloat3("Light color", glm::value_ptr(lightColor), 0.0f, 1.0f);
         ImGui::End();
         
         
