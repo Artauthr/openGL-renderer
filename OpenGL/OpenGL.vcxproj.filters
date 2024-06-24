@@ -478,8 +478,6 @@
     <None Include="src\vendor\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="res\shaders\fragment_basic.shader" />
-    <None Include="res\shaders\vertex_basic.shader" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\vendor\stb_image.h">
@@ -1386,9 +1384,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VertexArrayObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\SandboxScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\VertexBuffer.h">

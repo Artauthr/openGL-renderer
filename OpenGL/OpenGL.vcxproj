@@ -157,9 +157,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\fragment.shader" />
-    <None Include="res\shaders\fragment_basic.shader" />
     <None Include="res\shaders\vertex.shader" />
-    <None Include="res\shaders\vertex_basic.shader" />
     <None Include="src\vendor\glm\detail\func_common.inl" />
     <None Include="src\vendor\glm\detail\func_common_simd.inl" />
     <None Include="src\vendor\glm\detail\func_exponential.inl" />
@@ -303,7 +301,6 @@
     <ClInclude Include="include\Camera.h" />
     <ClInclude Include="include\IndexBuffer.h" />
     <ClInclude Include="include\VertexBuffer.h" />
-    <ClInclude Include="include\SandboxScene.h" />
     <ClInclude Include="include\Shader.h" />
     <ClInclude Include="include\VertexArrayObject.h" />
     <ClInclude Include="src\vendor\glm\common.hpp" />
